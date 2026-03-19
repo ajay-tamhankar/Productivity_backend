@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DatabaseModule } from './database/database.module';
+import { HealthModule } from './health/health.module';
 import { ItemsModule } from './items/items.module';
 import { MasterDataModule } from './master-data/master-data.module';
 import { MachinesModule } from './machines/machines.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module';
     }),
     DatabaseModule,
     AuthModule,
+    HealthModule,
     UsersModule,
     MachinesModule,
     MasterDataModule,
