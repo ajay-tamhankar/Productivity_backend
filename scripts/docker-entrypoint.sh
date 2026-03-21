@@ -10,4 +10,4 @@ echo "Running Prisma migrations..."
 npx prisma migrate deploy
 
 echo "Starting NestJS API on port ${PORT:-10000}..."
-exec node dist/main.js
+exec node dist/src/main.js
