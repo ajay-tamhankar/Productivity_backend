@@ -15,12 +15,4 @@ services:
       - key: BCRYPT_SALT_ROUNDS
         value: 10
       - key: DATABASE_URL
-        fromDatabase:
-          name: productivity-backend-db
-          property: connectionString
-
-databases:
-  - name: productivity-backend-db
-    plan: free
-    databaseName: production_shift_monitoring
-    user: productivity_backend_user
+        sync: false

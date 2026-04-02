@@ -20,5 +20,8 @@ COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+RUN apk add --no-cache dos2unix \
+  && dos2unix ./scripts/docker-entrypoint.sh \
+  && chmod +x ./scripts/docker-entrypoint.sh
 EXPOSE 10000
 CMD ["./scripts/docker-entrypoint.sh"]
