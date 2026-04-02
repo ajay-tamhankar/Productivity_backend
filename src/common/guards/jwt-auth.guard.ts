@@ -19,6 +19,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
+    const request = context.switchToHttp().getRequest();
+    const authHeader = request.headers['authorization'];
+    console.log(`[JwtAuthGuard] Incoming Authorization: ${authHeader ? 'Present' : 'Missing'}`);
+
     return super.canActivate(context);
   }
 }
