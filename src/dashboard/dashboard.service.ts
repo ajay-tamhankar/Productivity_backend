@@ -119,4 +119,50 @@ export class DashboardService {
       })),
     };
   }
+  
+  async getOperatorPerformance(query: DashboardQueryDto) {
+    const where = this.buildDateFilter(query.startDate, query.endDate);
+
+    const grouped = await this.prisma.productionEntry.groupBy({
+      by: ['operatorId'],
+      where,
+      _sum: { actualQuantity: true },
+      orderBy: { _sum: { actualQuantity: 'desc' } },
+      take: 10, // Top 10 operators
+    });
+
+    const operatorIds = grouped.map((item) => item.operatorId);
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: operatorIds } },
+      select: { id: true, name: true },
+    });
+
+    return grouped.map((item) => ({
+      name: users.find((u) => u.id === item.operatorId)?.name ?? 'Unknown',
+      value: item._sum.actualQuantity ?? 0,
+    }));
+  }
+
+  async getMachineOutput(query: DashboardQueryDto) {
+    const where = this.buildDateFilter(query.startDate, query.endDate);
+
+    const grouped = await this.prisma.productionEntry.groupBy({
+      by: ['machineId'],
+      where,
+      _sum: { actualQuantity: true },
+      orderBy: { _sum: { actualQuantity: 'desc' } },
+    });
+
+    const machineIds = grouped.map((item) => item.machineId);
+    const machines = await this.prisma.machine.findMany({
+      where: { id: { in: machineIds } },
+      select: { id: true, machineNumber: true, name: true },
+    });
+
+    return grouped.map((item) => ({
+      name: machines.find((m) => m.id === item.machineId)?.name ?? 'Unknown',
+      machineNumber: machines.find((m) => m.id === item.machineId)?.machineNumber,
+      value: item._sum.actualQuantity ?? 0,
+    }));
+  }
 }

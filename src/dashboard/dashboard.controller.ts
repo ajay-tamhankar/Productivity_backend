@@ -44,4 +44,18 @@ export class DashboardController {
   ) {
     return this.dashboardService.getOperatorStats(query, currentUser.sub);
   }
+
+  @Get('operator-performance')
+  @Roles(Role.ADMIN, Role.SUPERVISOR)
+  @ApiOperation({ summary: 'Get operator-wise performance chart data' })
+  getOperatorPerformance(@Query() query: DashboardQueryDto) {
+    return this.dashboardService.getOperatorPerformance(query);
+  }
+
+  @Get('machine-output')
+  @Roles(Role.ADMIN, Role.SUPERVISOR)
+  @ApiOperation({ summary: 'Get machine-wise output chart data' })
+  getMachineOutput(@Query() query: DashboardQueryDto) {
+    return this.dashboardService.getMachineOutput(query);
+  }
 }
