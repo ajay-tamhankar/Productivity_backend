@@ -65,7 +65,7 @@ export class DashboardService {
     const grouped = await this.prisma.rejectionLog.groupBy({
       by: ['reason'],
       where: {
-        productionEntry: { is: where },
+        productionEntry: { is: { ...where } },
       },
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: 'desc' } },
@@ -75,5 +75,46 @@ export class DashboardService {
       reason: item.reason,
       count: item._sum.quantity ?? 0,
     }));
+  }
+
+  async getOperatorStats(query: DashboardQueryDto, userId: string) {
+    const dateFilter = this.buildDateFilter(query.startDate, query.endDate);
+    const where = {
+      ...dateFilter,
+      operatorId: userId,
+    };
+
+    const aggregate = await this.prisma.productionEntry.aggregate({
+      where,
+      _sum: {
+        actualQuantity: true,
+        rejectionQuantity: true,
+        runningHours: true,
+      },
+      _avg: {
+        partsPerHour: true,
+      },
+    });
+
+    const rejectionReasons = await this.prisma.rejectionLog.groupBy({
+      by: ['reason'],
+      where: {
+        productionEntry: { is: where },
+      },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5,
+    });
+
+    return {
+      totalProduction: aggregate._sum.actualQuantity ?? 0,
+      totalRejection: aggregate._sum.rejectionQuantity ?? 0,
+      totalRunningHours: Number(aggregate._sum.runningHours ?? 0),
+      averagePartsPerHour: Number(aggregate._avg.partsPerHour ?? 0),
+      rejectionReasons: rejectionReasons.map((item) => ({
+        reason: item.reason,
+        count: item._sum.quantity ?? 0,
+      })),
+    };
   }
 }
