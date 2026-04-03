@@ -253,6 +253,11 @@ export class ProductionService {
         machineName: entry.machine.name,
         itemDescription: entry.item.description,
         actualQuantity: entry.actualQuantity,
+        rejectionQuantity: entry.rejectionQuantity,
+        runningHours: entry.runningHours,
+        partsPerHour: entry.partsPerHour,
+        weightInKgs: entry.weightInKgs,
+        approvalStatus: entry.approvalStatus,
       })),
     };
   }
