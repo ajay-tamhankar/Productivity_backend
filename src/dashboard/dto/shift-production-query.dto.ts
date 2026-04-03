@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDateString, IsOptional } from 'class-validator';
 
 export class ShiftProductionQueryDto {
-  @ApiProperty({ example: '2026-03-17' })
+  @ApiPropertyOptional({ example: '2026-03-17' })
+  @IsOptional()
   @IsDateString()
-  date: string;
+  date?: string;
 }

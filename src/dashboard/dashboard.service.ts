@@ -45,7 +45,9 @@ export class DashboardService {
   }
 
   async getShiftProduction(query: ShiftProductionQueryDto) {
-    const targetDate = new Date(query.date);
+    const targetDate = query.date 
+      ? new Date(query.date) 
+      : new Date(new Date().toISOString().split('T')[0]);
     const grouped = await this.prisma.productionEntry.groupBy({
       by: ['shift'],
       where: { entryDate: targetDate },
