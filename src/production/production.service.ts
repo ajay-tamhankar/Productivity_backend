@@ -38,21 +38,23 @@ export class ProductionService {
   }
 
   private async validateRelations(dto: CreateProductionEntryDto | UpdateProductionEntryDto) {
-    const checks: Promise<any>[] = [];
+    const promises: Promise<{name: string, exists: boolean}>[] = [];
 
     if (dto.operatorId) {
-      checks.push(this.prisma.user.findUnique({ where: { id: dto.operatorId } }));
+      promises.push(this.prisma.user.findUnique({ where: { id: dto.operatorId } }).then(u => ({ name: 'Operator', exists: !!u })));
     }
     if (dto.machineId) {
-      checks.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }));
+      promises.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }).then(m => ({ name: 'Machine', exists: !!m })));
     }
     if (dto.itemId) {
-      checks.push(this.prisma.item.findUnique({ where: { id: dto.itemId } }));
+      promises.push(this.prisma.item.findUnique({ where: { id: dto.itemId } }).then(i => ({ name: 'Item', exists: !!i })));
     }
 
-    const results = await Promise.all(checks);
-    if (results.some((value) => !value)) {
-      throw new BadRequestException('One or more related records were not found');
+    const results = await Promise.all(promises);
+    const missing = results.filter(r => !r.exists).map(r => r.name);
+
+    if (missing.length > 0) {
+      throw new BadRequestException(`The following related records were not found: ${missing.join(', ')}`);
     }
 
     // Auto-create RC number if it doesn't exist to prevent validation errors
