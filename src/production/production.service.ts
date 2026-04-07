@@ -124,6 +124,12 @@ export class ProductionService {
         rejectionQuantity: createProductionEntryDto.rejectionQuantity,
         startTime: new Date(createProductionEntryDto.startTime),
         endTime: new Date(createProductionEntryDto.endTime),
+        machineDowntimeStartTime: createProductionEntryDto.machineDowntimeStartTime
+          ? new Date(createProductionEntryDto.machineDowntimeStartTime)
+          : undefined,
+        machineDowntimeEndTime: createProductionEntryDto.machineDowntimeEndTime
+          ? new Date(createProductionEntryDto.machineDowntimeEndTime)
+          : undefined,
         approvalStatus,
         approvedById:
           approvalStatus === ApprovalStatus.APPROVED ? currentUser.sub : undefined,
@@ -196,6 +202,12 @@ export class ProductionService {
           : undefined,
         endTime: updateProductionEntryDto.endTime
           ? new Date(updateProductionEntryDto.endTime)
+          : undefined,
+        machineDowntimeStartTime: updateProductionEntryDto.machineDowntimeStartTime
+          ? new Date(updateProductionEntryDto.machineDowntimeStartTime)
+          : undefined,
+        machineDowntimeEndTime: updateProductionEntryDto.machineDowntimeEndTime
+          ? new Date(updateProductionEntryDto.machineDowntimeEndTime)
           : undefined,
         notes: updateProductionEntryDto.notes,
         approvalStatus: updateProductionEntryDto.approvalStatus,

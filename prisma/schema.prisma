@@ -86,6 +86,8 @@ model ProductionEntry {
   rejectionQuantity Int               @default(0)
   startTime         DateTime
   endTime           DateTime
+  machineDowntimeStartTime DateTime?
+  machineDowntimeEndTime   DateTime?
   runningHours      Decimal           @db.Decimal(10, 2)
   partsPerHour      Decimal           @db.Decimal(12, 2)
   weightInKgs       Decimal           @db.Decimal(12, 3)
