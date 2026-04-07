@@ -46,15 +46,6 @@ export class ProductionService {
     if (dto.machineId) {
       checks.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }));
     }
-    let rcNumPromiseIndex = -1;
-    if ('rcNumberId' in dto && dto.rcNumberId) {
-      rcNumPromiseIndex = checks.length;
-      checks.push(
-        this.prisma.rcNumber.findFirst({
-          where: { OR: [{ id: dto.rcNumberId }, { rcNumber: dto.rcNumberId }] },
-        }),
-      );
-    }
     if (dto.itemId) {
       checks.push(this.prisma.item.findUnique({ where: { id: dto.itemId } }));
     }
@@ -64,8 +55,19 @@ export class ProductionService {
       throw new BadRequestException('One or more related records were not found');
     }
 
-    if (rcNumPromiseIndex !== -1) {
-      dto.rcNumberId = results[rcNumPromiseIndex].id;
+    // Auto-create RC number if it doesn't exist to prevent validation errors
+    if ('rcNumberId' in dto && dto.rcNumberId) {
+      let rcRecord = await this.prisma.rcNumber.findFirst({
+        where: { OR: [{ id: dto.rcNumberId }, { rcNumber: dto.rcNumberId }] },
+      });
+      
+      if (!rcRecord) {
+        rcRecord = await this.prisma.rcNumber.create({
+          data: { rcNumber: dto.rcNumberId },
+        });
+      }
+      
+      dto.rcNumberId = rcRecord.id;
     }
   }
 
