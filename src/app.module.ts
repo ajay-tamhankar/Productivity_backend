@@ -7,7 +7,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { ItemsModule } from './items/items.module';
-import { MachineNumbersModule } from './machine-numbers/machine-numbers.module';
 import { MasterDataModule } from './master-data/master-data.module';
 import { MachinesModule } from './machines/machines.module';
 import { ProductionModule } from './production/production.module';
@@ -32,7 +31,6 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     UsersModule,
     MachinesModule,
-    MachineNumbersModule,
     RcNumbersModule,
     MasterDataModule,
     CustomersModule,

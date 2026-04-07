@@ -38,11 +38,6 @@ export class CreateProductionEntryDto {
   @IsString()
   itemId: string;
 
-  @ApiPropertyOptional({ example: 'machine-number-id', description: 'Optional machine number selection' })
-  @IsOptional()
-  @IsString()
-  machineNumberId?: string;
-
   @ApiPropertyOptional({ example: 'rc-number-id', description: 'Optional RC number selection' })
   @IsOptional()
   @IsString()

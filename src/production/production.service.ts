@@ -46,9 +46,6 @@ export class ProductionService {
     if (dto.machineId) {
       checks.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }));
     }
-    if ('machineNumberId' in dto && dto.machineNumberId) {
-      checks.push(this.prisma.machineNumber.findUnique({ where: { id: dto.machineNumberId } }));
-    }
     if ('rcNumberId' in dto && dto.rcNumberId) {
       checks.push(this.prisma.rcNumber.findUnique({ where: { id: dto.rcNumberId } }));
     }
@@ -90,7 +87,6 @@ export class ProductionService {
   private includeRelations = {
     operator: { select: { id: true, name: true, username: true, role: true } },
     machine: true,
-    machineNumber: true,
     rcNumber: true,
     item: true,
     approvedBy: { select: { id: true, name: true, username: true, role: true } },
@@ -121,7 +117,6 @@ export class ProductionService {
         shift: createProductionEntryDto.shift,
         operatorId: createProductionEntryDto.operatorId,
         machineId: createProductionEntryDto.machineId,
-        machineNumberId: createProductionEntryDto.machineNumberId ?? undefined,
         rcNumberId: createProductionEntryDto.rcNumberId ?? undefined,
         itemId: createProductionEntryDto.itemId,
         ccd1Quantity: createProductionEntryDto.ccd1Quantity,
@@ -197,7 +192,6 @@ export class ProductionService {
         shift: updateProductionEntryDto.shift,
         operatorId: updateProductionEntryDto.operatorId,
         machineId: updateProductionEntryDto.machineId,
-        machineNumberId: updateProductionEntryDto.machineNumberId ?? undefined,
         rcNumberId: updateProductionEntryDto.rcNumberId ?? undefined,
         itemId: updateProductionEntryDto.itemId,
         ccd1Quantity: updateProductionEntryDto.ccd1Quantity,
