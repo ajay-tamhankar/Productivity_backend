@@ -10,7 +10,7 @@ import { ItemsModule } from './items/items.module';
 import { MasterDataModule } from './master-data/master-data.module';
 import { MachinesModule } from './machines/machines.module';
 import { ProductionModule } from './production/production.module';
-import { RcNumbersModule } from './rc-numbers/rc-numbers.module';
+
 import { ReportsModule } from './reports/reports.module';
 import { UsersModule } from './users/users.module';
 
@@ -31,7 +31,7 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     UsersModule,
     MachinesModule,
-    RcNumbersModule,
+
     MasterDataModule,
     CustomersModule,
     ItemsModule,

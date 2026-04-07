@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CustomersService } from 'src/customers/customers.service';
 import { ItemsService } from 'src/items/items.service';
 import { MachinesService } from 'src/machines/machines.service';
-import { RcNumbersService } from 'src/rc-numbers/rc-numbers.service';
+
 
 @ApiTags('Master Data')
 @ApiBearerAuth()
@@ -13,7 +13,6 @@ export class MasterDataController {
     private readonly machinesService: MachinesService,
     private readonly itemsService: ItemsService,
     private readonly customersService: CustomersService,
-    private readonly rcNumbersService: RcNumbersService,
   ) {}
 
   @Get('machines')
@@ -34,9 +33,5 @@ export class MasterDataController {
     return this.customersService.findAll();
   }
 
-  @Get('rc-numbers')
-  @ApiOperation({ summary: 'Get RC number dropdown data' })
-  getRcNumbers() {
-    return this.rcNumbersService.findAll();
-  }
+
 }

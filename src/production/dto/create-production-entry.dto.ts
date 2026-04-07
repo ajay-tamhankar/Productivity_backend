@@ -38,16 +38,6 @@ export class CreateProductionEntryDto {
   @IsString()
   itemId: string;
 
-  @ApiPropertyOptional({ example: 'rc12', description: 'Optional RC number text' })
-  @IsOptional()
-  @IsString()
-  rcNumber?: string;
-
-  @ApiPropertyOptional({ example: 'rc12', description: 'Alias for rcNumber (Backward compatibility)' })
-  @IsOptional()
-  @IsString()
-  rcNumberId?: string;
-
   @ApiProperty({ example: 0, default: 0 })
   @IsInt()
   @Min(0)
