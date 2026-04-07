@@ -92,31 +92,73 @@ export class DashboardService {
         actualQuantity: true,
         rejectionQuantity: true,
         runningHours: true,
+        weightInKgs: true,
       },
       _avg: {
         partsPerHour: true,
       },
     });
 
-    const rejectionReasons = await this.prisma.rejectionLog.groupBy({
-      by: ['reason'],
+    // To calculate rejection weight correctly, we need the item's finish weight for each entry
+    const entries = await this.prisma.productionEntry.findMany({
+      where,
+      select: {
+        rejectionQuantity: true,
+        item: { select: { finishWeight: true } },
+      },
+    });
+
+    const totalRejectionWeight = entries.reduce((acc, entry) => {
+      const weight = (entry.rejectionQuantity * Number(entry.item.finishWeight)) / 1000;
+      return acc + weight;
+    }, 0);
+
+    const logs = await this.prisma.rejectionLog.findMany({
       where: {
         productionEntry: { is: where },
       },
-      _sum: { quantity: true },
-      orderBy: { _sum: { quantity: 'desc' } },
-      take: 5,
+      include: {
+        productionEntry: {
+          select: {
+            item: { select: { finishWeight: true } },
+          },
+        },
+      },
     });
+
+    const reasonsMap = new Map<string, { count: number; weight: number }>();
+    logs.forEach((log) => {
+      const current = reasonsMap.get(log.reason) || { count: 0, weight: 0 };
+      const weight = (log.quantity * Number(log.productionEntry.item.finishWeight)) / 1000;
+      reasonsMap.set(log.reason, {
+        count: current.count + log.quantity,
+        weight: current.weight + weight,
+      });
+    });
+
+    const rejectionReasons = Array.from(reasonsMap.entries())
+      .map(([reason, data]) => ({
+        reason,
+        count: data.count,
+        weight: Number(data.weight.toFixed(3)),
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const totalProductionWeight = Number(aggregate._sum.weightInKgs ?? 0);
+    const totalRunningHours = Number(aggregate._sum.runningHours ?? 0);
 
     return {
       totalProduction: aggregate._sum.actualQuantity ?? 0,
+      totalProductionweight: Number(totalProductionWeight.toFixed(3)),
       totalRejection: aggregate._sum.rejectionQuantity ?? 0,
-      totalRunningHours: Number(aggregate._sum.runningHours ?? 0),
+      totalRejectionweight: Number(totalRejectionWeight.toFixed(3)),
+      totalRunningHours: totalRunningHours,
+      totalRunningHoursweight: totalRunningHours > 0 
+        ? Number((totalProductionWeight / totalRunningHours).toFixed(2)) 
+        : 0,
       averagePartsPerHour: Number(aggregate._avg.partsPerHour ?? 0),
-      rejectionReasons: rejectionReasons.map((item) => ({
-        reason: item.reason,
-        count: item._sum.quantity ?? 0,
-      })),
+      rejectionReasons: rejectionReasons,
     };
   }
   
