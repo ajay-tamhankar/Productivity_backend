@@ -57,20 +57,6 @@ export class ProductionService {
       throw new BadRequestException(`The following related records were not found: ${missing.join(', ')}`);
     }
 
-    // Auto-create RC number if it doesn't exist to prevent validation errors
-    if ('rcNumberId' in dto && dto.rcNumberId) {
-      let rcRecord = await this.prisma.rcNumber.findFirst({
-        where: { OR: [{ id: dto.rcNumberId }, { rcNumber: dto.rcNumberId }] },
-      });
-      
-      if (!rcRecord) {
-        rcRecord = await this.prisma.rcNumber.create({
-          data: { rcNumber: dto.rcNumberId },
-        });
-      }
-      
-      dto.rcNumberId = rcRecord.id;
-    }
   }
 
   private ensureBusinessRules(actualQuantity: number, rejectionQuantity: number) {
@@ -101,7 +87,6 @@ export class ProductionService {
   private includeRelations = {
     operator: { select: { id: true, name: true, username: true, role: true } },
     machine: true,
-    rcNumber: true,
     item: true,
     approvedBy: { select: { id: true, name: true, username: true, role: true } },
     rejectionLogs: true,
@@ -131,7 +116,7 @@ export class ProductionService {
         shift: createProductionEntryDto.shift,
         operatorId: createProductionEntryDto.operatorId,
         machineId: createProductionEntryDto.machineId,
-        rcNumberId: createProductionEntryDto.rcNumberId ?? undefined,
+        rcNumber: createProductionEntryDto.rcNumber ?? createProductionEntryDto.rcNumberId ?? undefined,
         itemId: createProductionEntryDto.itemId,
         ccd1Quantity: createProductionEntryDto.ccd1Quantity,
         actualQuantity: createProductionEntryDto.actualQuantity,
@@ -206,7 +191,7 @@ export class ProductionService {
         shift: updateProductionEntryDto.shift,
         operatorId: updateProductionEntryDto.operatorId,
         machineId: updateProductionEntryDto.machineId,
-        rcNumberId: updateProductionEntryDto.rcNumberId ?? undefined,
+        rcNumber: updateProductionEntryDto.rcNumber ?? updateProductionEntryDto.rcNumberId ?? undefined,
         itemId: updateProductionEntryDto.itemId,
         ccd1Quantity: updateProductionEntryDto.ccd1Quantity,
         actualQuantity: updateProductionEntryDto.actualQuantity,
@@ -278,6 +263,7 @@ export class ProductionService {
         shift: entry.shift,
         machineName: entry.machine.name,
         itemDescription: entry.item.description,
+        rcNumber: entry.rcNumber,
         actualQuantity: entry.actualQuantity,
         rejectionQuantity: entry.rejectionQuantity,
         runningHours: entry.runningHours,

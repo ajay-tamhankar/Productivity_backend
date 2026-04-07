@@ -38,7 +38,12 @@ export class CreateProductionEntryDto {
   @IsString()
   itemId: string;
 
-  @ApiPropertyOptional({ example: 'rc-number-id', description: 'Optional RC number selection' })
+  @ApiPropertyOptional({ example: 'rc12', description: 'Optional RC number text' })
+  @IsOptional()
+  @IsString()
+  rcNumber?: string;
+
+  @ApiPropertyOptional({ example: 'rc12', description: 'Alias for rcNumber (Backward compatibility)' })
   @IsOptional()
   @IsString()
   rcNumberId?: string;

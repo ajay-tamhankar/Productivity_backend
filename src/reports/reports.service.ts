@@ -34,7 +34,6 @@ export class ReportsService {
         include: {
           operator: { select: { id: true, name: true, username: true } },
           machine: true,
-          rcNumber: true,
           item: true,
           rejectionLogs: true,
         },

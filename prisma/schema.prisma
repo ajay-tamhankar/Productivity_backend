@@ -69,7 +69,6 @@ model RcNumber {
   description       String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
-  productionEntries ProductionEntry[]
 }
 
 model Item {
@@ -88,7 +87,7 @@ model ProductionEntry {
   shift             Shift
   operatorId        String
   machineId         String
-  rcNumberId        String?
+  rcNumber          String?
   itemId            String
   ccd1Quantity      Int               @default(0)
   actualQuantity    Int
@@ -108,7 +107,6 @@ model ProductionEntry {
   operator          User              @relation("OperatorProductionEntries", fields: [operatorId], references: [id])
   approvedBy        User?             @relation("ApprovedProductionEntries", fields: [approvedById], references: [id])
   machine           Machine           @relation(fields: [machineId], references: [id])
-  rcNumber          RcNumber?         @relation(fields: [rcNumberId], references: [id])
   item              Item              @relation(fields: [itemId], references: [id])
   rejectionLogs     RejectionLog[]
 
