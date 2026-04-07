@@ -60,6 +60,21 @@ model Customer {
   customerName      String            @unique
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+}
+
+model MachineNumber {
+  id                String            @id @default(cuid())
+  value             String            @unique
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  productionEntries ProductionEntry[]
+}
+
+model RcNumber {
+  id                String            @id @default(cuid())
+  value             String            @unique
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   productionEntries ProductionEntry[]
 }
 
@@ -79,7 +94,8 @@ model ProductionEntry {
   shift             Shift
   operatorId        String
   machineId         String
-  customerId        String
+  machineNumberId   String?
+  rcNumberId        String?
   itemId            String
   ccd1Quantity      Int               @default(0)
   actualQuantity    Int
@@ -99,7 +115,8 @@ model ProductionEntry {
   operator          User              @relation("OperatorProductionEntries", fields: [operatorId], references: [id])
   approvedBy        User?             @relation("ApprovedProductionEntries", fields: [approvedById], references: [id])
   machine           Machine           @relation(fields: [machineId], references: [id])
-  customer          Customer          @relation(fields: [customerId], references: [id])
+  machineNumber     MachineNumber?    @relation(fields: [machineNumberId], references: [id])
+  rcNumber          RcNumber?         @relation(fields: [rcNumberId], references: [id])
   item              Item              @relation(fields: [itemId], references: [id])
   rejectionLogs     RejectionLog[]
 

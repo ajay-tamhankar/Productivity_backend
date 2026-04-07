@@ -46,8 +46,11 @@ export class ProductionService {
     if (dto.machineId) {
       checks.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }));
     }
-    if (dto.customerId) {
-      checks.push(this.prisma.customer.findUnique({ where: { id: dto.customerId } }));
+    if ('machineNumberId' in dto && dto.machineNumberId) {
+      checks.push(this.prisma.machineNumber.findUnique({ where: { id: dto.machineNumberId } }));
+    }
+    if ('rcNumberId' in dto && dto.rcNumberId) {
+      checks.push(this.prisma.rcNumber.findUnique({ where: { id: dto.rcNumberId } }));
     }
     if (dto.itemId) {
       checks.push(this.prisma.item.findUnique({ where: { id: dto.itemId } }));
@@ -87,7 +90,8 @@ export class ProductionService {
   private includeRelations = {
     operator: { select: { id: true, name: true, username: true, role: true } },
     machine: true,
-    customer: true,
+    machineNumber: true,
+    rcNumber: true,
     item: true,
     approvedBy: { select: { id: true, name: true, username: true, role: true } },
     rejectionLogs: true,
@@ -117,7 +121,8 @@ export class ProductionService {
         shift: createProductionEntryDto.shift,
         operatorId: createProductionEntryDto.operatorId,
         machineId: createProductionEntryDto.machineId,
-        customerId: createProductionEntryDto.customerId,
+        machineNumberId: createProductionEntryDto.machineNumberId ?? undefined,
+        rcNumberId: createProductionEntryDto.rcNumberId ?? undefined,
         itemId: createProductionEntryDto.itemId,
         ccd1Quantity: createProductionEntryDto.ccd1Quantity,
         actualQuantity: createProductionEntryDto.actualQuantity,
@@ -192,7 +197,8 @@ export class ProductionService {
         shift: updateProductionEntryDto.shift,
         operatorId: updateProductionEntryDto.operatorId,
         machineId: updateProductionEntryDto.machineId,
-        customerId: updateProductionEntryDto.customerId,
+        machineNumberId: updateProductionEntryDto.machineNumberId ?? undefined,
+        rcNumberId: updateProductionEntryDto.rcNumberId ?? undefined,
         itemId: updateProductionEntryDto.itemId,
         ccd1Quantity: updateProductionEntryDto.ccd1Quantity,
         actualQuantity: updateProductionEntryDto.actualQuantity,
