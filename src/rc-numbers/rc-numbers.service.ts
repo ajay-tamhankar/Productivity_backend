@@ -13,17 +13,22 @@ export class RcNumbersService {
 
   async create(dto: CreateRcNumberDto) {
     const existing = await this.prisma.rcNumber.findUnique({
-      where: { value: dto.value },
+      where: { rcNumber: dto.rcNumber },
     });
     if (existing) {
-      throw new BadRequestException(`RC number '${dto.value}' already exists`);
+      throw new BadRequestException(`RC number '${dto.rcNumber}' already exists`);
     }
-    return this.prisma.rcNumber.create({ data: { value: dto.value } });
+    return this.prisma.rcNumber.create({
+      data: {
+        rcNumber: dto.rcNumber,
+        description: dto.description,
+      },
+    });
   }
 
   findAll() {
     return this.prisma.rcNumber.findMany({
-      orderBy: { value: 'asc' },
+      orderBy: { rcNumber: 'asc' },
     });
   }
 
@@ -37,15 +42,21 @@ export class RcNumbersService {
 
   async update(id: string, dto: UpdateRcNumberDto) {
     await this.findOne(id);
-    if (dto.value) {
+    if (dto.rcNumber) {
       const conflict = await this.prisma.rcNumber.findFirst({
-        where: { value: dto.value, NOT: { id } },
+        where: { rcNumber: dto.rcNumber, NOT: { id } },
       });
       if (conflict) {
-        throw new BadRequestException(`RC number '${dto.value}' already exists`);
+        throw new BadRequestException(`RC number '${dto.rcNumber}' already exists`);
       }
     }
-    return this.prisma.rcNumber.update({ where: { id }, data: { value: dto.value } });
+    return this.prisma.rcNumber.update({
+      where: { id },
+      data: {
+        rcNumber: dto.rcNumber,
+        description: dto.description,
+      },
+    });
   }
 
   async remove(id: string) {

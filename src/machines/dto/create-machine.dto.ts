@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MachineStatus } from '@prisma/client';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class CreateMachineDto {
   @ApiProperty({ example: 'M-201' })
@@ -11,7 +11,8 @@ export class CreateMachineDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ enum: MachineStatus, example: MachineStatus.ACTIVE })
+  @ApiPropertyOptional({ enum: MachineStatus, example: MachineStatus.ACTIVE, default: MachineStatus.ACTIVE })
+  @IsOptional()
   @IsEnum(MachineStatus)
-  status: MachineStatus;
+  status?: MachineStatus;
 }
