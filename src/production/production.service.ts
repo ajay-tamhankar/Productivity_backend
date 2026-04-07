@@ -38,7 +38,7 @@ export class ProductionService {
   }
 
   private async validateRelations(dto: CreateProductionEntryDto | UpdateProductionEntryDto) {
-    const checks: Promise<unknown>[] = [];
+    const checks: Promise<any>[] = [];
 
     if (dto.operatorId) {
       checks.push(this.prisma.user.findUnique({ where: { id: dto.operatorId } }));
@@ -46,8 +46,14 @@ export class ProductionService {
     if (dto.machineId) {
       checks.push(this.prisma.machine.findUnique({ where: { id: dto.machineId } }));
     }
+    let rcNumPromiseIndex = -1;
     if ('rcNumberId' in dto && dto.rcNumberId) {
-      checks.push(this.prisma.rcNumber.findUnique({ where: { id: dto.rcNumberId } }));
+      rcNumPromiseIndex = checks.length;
+      checks.push(
+        this.prisma.rcNumber.findFirst({
+          where: { OR: [{ id: dto.rcNumberId }, { rcNumber: dto.rcNumberId }] },
+        }),
+      );
     }
     if (dto.itemId) {
       checks.push(this.prisma.item.findUnique({ where: { id: dto.itemId } }));
@@ -56,6 +62,10 @@ export class ProductionService {
     const results = await Promise.all(checks);
     if (results.some((value) => !value)) {
       throw new BadRequestException('One or more related records were not found');
+    }
+
+    if (rcNumPromiseIndex !== -1) {
+      dto.rcNumberId = results[rcNumPromiseIndex].id;
     }
   }
 
