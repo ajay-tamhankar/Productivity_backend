@@ -19,8 +19,8 @@ export class MachinesService {
     return this.prisma.machine.create({ data: createMachineDto });
   }
 
-  findAll() {
-    return this.prisma.machine.findMany({
+  async findAll() {
+    const machines = await this.prisma.machine.findMany({
       select: {
         id: true,
         machineNumber: true,
@@ -29,7 +29,40 @@ export class MachinesService {
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: { machineNumber: 'asc' },
+    });
+
+    const MACHINE_ORDER = [
+      'M-101',
+      '932 - 1',
+      '932 - 2',
+      '937 - 3',
+      '935 - 4',
+      '936 - 5',
+      '933 - 6',
+      '1068 - 7',
+      '1072 - 8',
+      '1078 - 9',
+      '1013 - 10',
+      '1123 - 11',
+      '1124 - 12',
+      '1009 - 1',
+      '1010 - 2',
+      '1011 - 3',
+    ];
+
+    return machines.sort((a, b) => {
+      let indexA = MACHINE_ORDER.indexOf(a.machineNumber);
+      let indexB = MACHINE_ORDER.indexOf(b.machineNumber);
+
+      // Machines not in the list go to the end
+      if (indexA === -1) indexA = MACHINE_ORDER.length;
+      if (indexB === -1) indexB = MACHINE_ORDER.length;
+
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+      // Failover to secondary sort by number
+      return a.machineNumber.localeCompare(b.machineNumber);
     });
   }
 
