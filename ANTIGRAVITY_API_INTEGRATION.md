@@ -101,6 +101,7 @@ The backend computes `runningHours`, `partsPerHour`, and `weightInKgs` server-si
    - `/api/master-data/machines`
    - `/api/master-data/items`
    - `/api/master-data/customers`
+   - `/api/master-data/rejection-reasons`
 3. Submit production entries with foreign key IDs.
 4. Load operator feed, dashboard, and reports based on role.
 
@@ -158,6 +159,21 @@ Response:
 ]
 ```
 
+### Get Rejection Reasons
+
+- `GET /api/master-data/rejection-reasons`
+
+Response:
+
+```json
+[
+  "Forging Defects",
+  "Rolling Defects",
+  "Finishing defects",
+  "All Process defect"
+]
+```
+
 ## Production Entry API
 
 ### Create Production Entry
@@ -181,8 +197,8 @@ Request:
   "endTime": "2026-03-17T16:30:00.000Z",
   "notes": "Shift completed",
   "rejectionDetails": [
-    { "reason": "Scratch", "quantity": 8 },
-    { "reason": "Dent", "quantity": 12 }
+    { "reason": "Forging Defects", "quantity": 8 },
+    { "reason": "Rolling Defects", "quantity": 12 }
   ]
 }
 ```

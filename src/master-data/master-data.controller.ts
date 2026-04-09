@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CustomersService } from 'src/customers/customers.service';
 import { ItemsService } from 'src/items/items.service';
 import { MachinesService } from 'src/machines/machines.service';
+import { REJECTION_REASONS } from 'src/production/dto/rejection-detail.dto';
 
 
 @ApiTags('Master Data')
@@ -31,6 +32,12 @@ export class MasterDataController {
   @ApiOperation({ summary: 'Get customer dropdown data' })
   getCustomers() {
     return this.customersService.findAll();
+  }
+
+  @Get('rejection-reasons')
+  @ApiOperation({ summary: 'Get rejection reason options' })
+  getRejectionReasons() {
+    return REJECTION_REASONS;
   }
 
 

@@ -9,6 +9,7 @@ import { PrismaService } from 'src/database/prisma.service';
 import { CreateProductionEntryDto } from './dto/create-production-entry.dto';
 import { ProductionFeedQueryDto } from './dto/production-feed-query.dto';
 import { UpdateProductionEntryDto } from './dto/update-production-entry.dto';
+import { RejectionDetailDto } from './dto/rejection-detail.dto';
 
 @Injectable()
 export class ProductionService {
@@ -59,9 +60,22 @@ export class ProductionService {
 
   }
 
-  private ensureBusinessRules(actualQuantity: number, rejectionQuantity: number) {
+  private ensureBusinessRules(
+    actualQuantity: number,
+    rejectionQuantity: number,
+    rejectionDetails?: RejectionDetailDto[],
+  ) {
     if (rejectionQuantity > actualQuantity) {
       throw new BadRequestException('Rejection quantity cannot exceed actual quantity');
+    }
+
+    if (rejectionDetails && rejectionDetails.length > 0) {
+      const detailsSum = rejectionDetails.reduce((sum, d) => sum + d.quantity, 0);
+      if (detailsSum !== rejectionQuantity) {
+        throw new BadRequestException(
+          `Sum of rejection details (${detailsSum}) must match total rejection quantity (${rejectionQuantity})`,
+        );
+      }
     }
   }
 
@@ -97,6 +111,7 @@ export class ProductionService {
     this.ensureBusinessRules(
       createProductionEntryDto.actualQuantity,
       createProductionEntryDto.rejectionQuantity,
+      createProductionEntryDto.rejectionDetails,
     );
 
     const computed = await this.buildComputedData({
@@ -171,7 +186,14 @@ export class ProductionService {
     const actualQuantity = updateProductionEntryDto.actualQuantity ?? existingEntry.actualQuantity;
     const rejectionQuantity =
       updateProductionEntryDto.rejectionQuantity ?? existingEntry.rejectionQuantity;
-    this.ensureBusinessRules(actualQuantity, rejectionQuantity);
+    
+    // We need to handle the case where rejectionDetails might be implicitly empty if not provided in update
+    // But usually update should only validate if details are actually provided in the payload
+    this.ensureBusinessRules(
+      actualQuantity, 
+      rejectionQuantity, 
+      updateProductionEntryDto.rejectionDetails
+    );
 
     const mergedInput = {
       itemId: updateProductionEntryDto.itemId ?? existingEntry.itemId,
