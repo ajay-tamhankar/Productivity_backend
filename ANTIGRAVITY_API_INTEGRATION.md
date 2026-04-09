@@ -119,7 +119,9 @@ Response:
     "id": "machine-id",
     "machineNumber": "M-101",
     "name": "Injection Machine 101",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "createdAt": "2026-04-02T12:38:13.484Z",
+    "updatedAt": "2026-04-02T12:38:13.484Z"
   }
 ]
 ```

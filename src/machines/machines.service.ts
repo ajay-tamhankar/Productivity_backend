@@ -20,7 +20,17 @@ export class MachinesService {
   }
 
   findAll() {
-    return this.prisma.machine.findMany({ orderBy: { machineNumber: 'asc' } });
+    return this.prisma.machine.findMany({
+      select: {
+        id: true,
+        machineNumber: true,
+        name: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { machineNumber: 'asc' },
+    });
   }
 
   async findOne(id: string) {
