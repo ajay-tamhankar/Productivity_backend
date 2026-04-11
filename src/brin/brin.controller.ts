@@ -32,7 +32,7 @@ export class BrinController {
     @Body() dto: UpdateLocationDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.brinService.updateLocationByRc(rcNumber, dto.location, dto.comment, user.sub);
+    return this.brinService.updateLocationByRc(rcNumber, dto.location, user.sub);
   }
 
   @Patch('entries/:id/quantity')

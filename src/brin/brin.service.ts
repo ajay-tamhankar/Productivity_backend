@@ -23,7 +23,7 @@ export class BrinService {
     });
   }
 
-  async updateLocationByRc(rcNumber: string, location: string, comment: string, userId: string) {
+  async updateLocationByRc(rcNumber: string, location: string, userId: string) {
     const entries = await this.prisma.productionEntry.findMany({
       where: { rcNumber },
     });
@@ -41,7 +41,7 @@ export class BrinService {
             activityType: 'LOCATION_UPDATE',
             oldValue: entry.location || 'N/A',
             newValue: location,
-            comment,
+            comment: 'Location updated',
             editedById: userId,
           },
         });
