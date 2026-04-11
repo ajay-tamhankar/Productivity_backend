@@ -13,6 +13,7 @@ import { ProductionModule } from './production/production.module';
 
 import { ReportsModule } from './reports/reports.module';
 import { UsersModule } from './users/users.module';
+import { BrinModule } from './brin/brin.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UsersModule } from './users/users.module';
     ProductionModule,
     DashboardModule,
     ReportsModule,
+    BrinModule,
   ],
 })
 export class AppModule {}

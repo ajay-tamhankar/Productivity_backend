@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateMachineDto } from './dto/create-machine.dto';
 import { UpdateMachineDto } from './dto/update-machine.dto';
@@ -81,7 +82,18 @@ export class MachinesService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.machine.delete({ where: { id } });
-    return { message: 'Machine deleted successfully' };
+    try {
+      await this.prisma.machine.delete({ where: { id } });
+      return { message: 'Machine deleted successfully' };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ConflictException(
+            'Cannot delete machine because it has associated production entries or other records.',
+          );
+        }
+      }
+      throw error;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -38,7 +39,18 @@ export class ItemsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.item.delete({ where: { id } });
-    return { message: 'Item deleted successfully' };
+    try {
+      await this.prisma.item.delete({ where: { id } });
+      return { message: 'Item deleted successfully' };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ConflictException(
+            'Cannot delete item because it has associated production entries or other records.',
+          );
+        }
+      }
+      throw error;
+    }
   }
 }

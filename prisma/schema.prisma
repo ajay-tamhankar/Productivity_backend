@@ -11,6 +11,7 @@ enum Role {
   ADMIN
   SUPERVISOR
   OPERATOR
+  BRIN
 }
 
 enum MachineStatus {
@@ -43,6 +44,7 @@ model User {
   updatedAt          DateTime           @updatedAt
   productionEntries  ProductionEntry[]  @relation("OperatorProductionEntries")
   approvedEntries    ProductionEntry[]  @relation("ApprovedProductionEntries")
+  quantityEdits      QuantityEditLog[]
 }
 
 model Machine {
@@ -94,6 +96,7 @@ model ProductionEntry {
   approvalStatus    ApprovalStatus    @default(PENDING)
   approvedById      String?
   notes             String?
+  location          String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   operator          User              @relation("OperatorProductionEntries", fields: [operatorId], references: [id])
@@ -101,6 +104,7 @@ model ProductionEntry {
   machine           Machine           @relation(fields: [machineId], references: [id])
   item              Item              @relation(fields: [itemId], references: [id])
   rejectionLogs     RejectionLog[]
+  quantityEditLogs  QuantityEditLog[]
 
   @@index([entryDate, shift])
   @@index([machineId])
@@ -114,6 +118,21 @@ model RejectionLog {
   quantity          Int
   createdAt         DateTime         @default(now())
   productionEntry   ProductionEntry  @relation(fields: [productionEntryId], references: [id], onDelete: Cascade)
+
+  @@index([productionEntryId])
+}
+
+model QuantityEditLog {
+  id                String           @id @default(cuid())
+  productionEntryId String
+  previousQuantity  Int
+  newQuantity       Int
+  comment           String
+  editedById        String
+  createdAt         DateTime         @default(now())
+
+  productionEntry   ProductionEntry  @relation(fields: [productionEntryId], references: [id], onDelete: Cascade)
+  editedBy          User             @relation(fields: [editedById], references: [id])
 
   @@index([productionEntryId])
 }

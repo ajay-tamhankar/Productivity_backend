@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from 'src/database/prisma.service';
@@ -129,7 +130,18 @@ export class UsersService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.user.delete({ where: { id } });
-    return { message: 'User deleted successfully' };
+    try {
+      await this.prisma.user.delete({ where: { id } });
+      return { message: 'User deleted successfully' };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new ConflictException(
+            'Cannot delete user because they have associated production entries or other records.',
+          );
+        }
+      }
+      throw error;
+    }
   }
 }
