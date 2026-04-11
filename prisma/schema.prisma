@@ -85,6 +85,7 @@ model ProductionEntry {
   itemId            String
   ccd1Quantity      Int               @default(0)
   actualQuantity    Int
+  correctedQuantity Int?              @default(0)
   rejectionQuantity Int               @default(0)
   startTime         DateTime
   endTime           DateTime

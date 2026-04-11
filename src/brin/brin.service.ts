@@ -87,7 +87,7 @@ export class BrinService {
         data: {
           productionEntryId: entryId,
           activityType: 'QUANTITY_UPDATE',
-          oldValue: previousQuantity.toString(),
+          oldValue: (entry.correctedQuantity || entry.actualQuantity).toString(),
           newValue: newQuantity.toString(),
           comment: updateDto.comment,
           editedById: userId,
@@ -98,7 +98,7 @@ export class BrinService {
       return tx.productionEntry.update({
         where: { id: entryId },
         data: {
-          actualQuantity: newQuantity,
+          correctedQuantity: newQuantity,
           partsPerHour,
           weightInKgs,
         },

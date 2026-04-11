@@ -53,61 +53,74 @@ export class ReportsService {
 
   async getDailyReport(query: ReportQueryDto) {
     const where = this.buildWhere(query);
-    return this.prisma.productionEntry.groupBy({
-      by: ['entryDate'],
-      where,
-      _sum: {
-        actualQuantity: true,
-        rejectionQuantity: true,
-        runningHours: true,
-      },
-      _avg: { partsPerHour: true },
-      orderBy: { entryDate: 'asc' },
-    });
+    // Use raw SQL to handle COALESCE correctly in grouping
+    return this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        "entryDate",
+        SUM(COALESCE("correctedQuantity", "actualQuantity")) as "actualQuantity",
+        SUM("rejectionQuantity") as "rejectionQuantity",
+        SUM("runningHours") as "runningHours",
+        AVG("partsPerHour") as "partsPerHour"
+      FROM "ProductionEntry"
+      WHERE "entryDate" >= $1 AND "entryDate" <= $2
+      GROUP BY "entryDate"
+      ORDER BY "entryDate" ASC
+    `, 
+    query.startDate ? new Date(query.startDate) : new Date('2000-01-01'), 
+    query.endDate ? new Date(query.endDate) : new Date('2100-01-01'));
   }
 
   async getShiftReport(query: ReportQueryDto) {
     const where = this.buildWhere(query);
-    return this.prisma.productionEntry.groupBy({
-      by: ['shift'],
-      where,
-      _sum: {
-        actualQuantity: true,
-        rejectionQuantity: true,
-      },
-      _avg: { partsPerHour: true },
-      orderBy: { shift: 'asc' },
-    });
+    return this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        "shift",
+        SUM(COALESCE("correctedQuantity", "actualQuantity")) as "actualQuantity",
+        SUM("rejectionQuantity") as "rejectionQuantity",
+        AVG("partsPerHour") as "partsPerHour"
+      FROM "ProductionEntry"
+      WHERE "entryDate" >= $1 AND "entryDate" <= $2
+      GROUP BY "shift"
+      ORDER BY "shift" ASC
+    `,
+    query.startDate ? new Date(query.startDate) : new Date('2000-01-01'), 
+    query.endDate ? new Date(query.endDate) : new Date('2100-01-01'));
   }
 
   async getOperatorPerformanceReport(query: ReportQueryDto) {
     const where = this.buildWhere(query);
-    return this.prisma.productionEntry.groupBy({
-      by: ['operatorId'],
-      where,
-      _sum: {
-        actualQuantity: true,
-        rejectionQuantity: true,
-        runningHours: true,
-      },
-      _avg: { partsPerHour: true },
-      orderBy: { _sum: { actualQuantity: 'desc' } },
-    });
+    return this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        "operatorId",
+        SUM(COALESCE("correctedQuantity", "actualQuantity")) as "actualQuantity",
+        SUM("rejectionQuantity") as "rejectionQuantity",
+        SUM("runningHours") as "runningHours",
+        AVG("partsPerHour") as "partsPerHour"
+      FROM "ProductionEntry"
+      WHERE "entryDate" >= $1 AND "entryDate" <= $2
+      GROUP BY "operatorId"
+      ORDER BY "actualQuantity" DESC
+    `,
+    query.startDate ? new Date(query.startDate) : new Date('2000-01-01'), 
+    query.endDate ? new Date(query.endDate) : new Date('2100-01-01'));
   }
 
   async getMachinePerformanceReport(query: ReportQueryDto) {
     const where = this.buildWhere(query);
-    return this.prisma.productionEntry.groupBy({
-      by: ['machineId'],
-      where,
-      _sum: {
-        actualQuantity: true,
-        rejectionQuantity: true,
-        runningHours: true,
-      },
-      _avg: { partsPerHour: true },
-      orderBy: { _sum: { actualQuantity: 'desc' } },
-    });
+    return this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        "machineId",
+        SUM(COALESCE("correctedQuantity", "actualQuantity")) as "actualQuantity",
+        SUM("rejectionQuantity") as "rejectionQuantity",
+        SUM("runningHours") as "runningHours",
+        AVG("partsPerHour") as "partsPerHour"
+      FROM "ProductionEntry"
+      WHERE "entryDate" >= $1 AND "entryDate" <= $2
+      GROUP BY "machineId"
+      ORDER BY "actualQuantity" DESC
+    `,
+    query.startDate ? new Date(query.startDate) : new Date('2000-01-01'), 
+    query.endDate ? new Date(query.endDate) : new Date('2100-01-01'));
   }
 
   async getRejectionAnalysisReport(query: ReportQueryDto) {
