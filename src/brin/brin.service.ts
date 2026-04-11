@@ -1,15 +1,50 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UpdateQuantityWithLogDto } from './dto/update-quantity-with-log.dto';
-import { BrinSummaryQueryDto } from './dto/brin-summary-query.dto';
+import { BrinSummaryQueryDto, DateRange } from './dto/brin-summary-query.dto';
 
 @Injectable()
 export class BrinService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getRcSummary(query: BrinSummaryQueryDto) {
-    const { startDate, endDate, rcNumber } = query;
+    let { startDate, endDate, range, rcNumber } = query;
     const params: any[] = [];
+
+    if (range && range !== DateRange.ALL) {
+      const now = new Date();
+      const todayStart = new Date(now.setHours(0, 0, 0, 0));
+      const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+      switch (range) {
+        case DateRange.TODAY:
+          startDate = todayStart.toISOString();
+          endDate = todayEnd.toISOString();
+          break;
+        case DateRange.YESTERDAY:
+          const yesterday = new Date(todayStart);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayEnd = new Date(yesterday);
+          yesterdayEnd.setHours(23, 59, 59, 999);
+          startDate = yesterday.toISOString();
+          endDate = yesterdayEnd.toISOString();
+          break;
+        case DateRange.THIS_WEEK:
+          const monday = new Date(todayStart);
+          const day = monday.getDay();
+          const diff = monday.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+          monday.setDate(diff);
+          startDate = monday.toISOString();
+          // endDate remains undefined (now)
+          break;
+        case DateRange.THIS_MONTH:
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+          startDate = firstDay.toISOString();
+          // endDate remains undefined (now)
+          break;
+      }
+    }
+
     let whereClause = 'WHERE e."rcNumber" IS NOT NULL';
 
     if (startDate) {
