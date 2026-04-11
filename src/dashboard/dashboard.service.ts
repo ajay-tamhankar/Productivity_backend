@@ -211,7 +211,7 @@ export class DashboardService {
     const totalRunningHours = Number(aggregate._sum.runningHours ?? 0);
 
     return {
-      totalProduction: aggregate._sum.actualQuantity ?? 0,
+      totalProduction,
       totalProductionweight: Number(totalProductionWeight.toFixed(3)),
       totalRejection: aggregate._sum.rejectionQuantity ?? 0,
       totalRejectionweight: Number(totalRejectionWeight.toFixed(3)),
