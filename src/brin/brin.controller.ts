@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -9,6 +9,7 @@ import { AuthenticatedUser } from '../common/interfaces/authenticated-user.inter
 import { BrinService } from './brin.service';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UpdateQuantityWithLogDto } from './dto/update-quantity-with-log.dto';
+import { BrinSummaryQueryDto } from './dto/brin-summary-query.dto';
 
 /**
  * Last updated: 2026-04-11 for quantity separation fix
@@ -19,6 +20,13 @@ import { UpdateQuantityWithLogDto } from './dto/update-quantity-with-log.dto';
 @Controller('brin')
 export class BrinController {
   constructor(private readonly brinService: BrinService) {}
+
+  @Get('rc-summary')
+  @Roles(Role.BRIN)
+  @ApiOperation({ summary: 'Get RC-wise production summary (BRIN only)' })
+  getRcSummary(@Query() query: BrinSummaryQueryDto) {
+    return this.brinService.getRcSummary(query);
+  }
 
   @Get('rc/:rcNumber')
   @Roles(Role.BRIN, Role.ADMIN)

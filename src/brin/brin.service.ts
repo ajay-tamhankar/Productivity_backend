@@ -1,10 +1,46 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UpdateQuantityWithLogDto } from './dto/update-quantity-with-log.dto';
+import { BrinSummaryQueryDto } from './dto/brin-summary-query.dto';
 
 @Injectable()
 export class BrinService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getRcSummary(query: BrinSummaryQueryDto) {
+    const { startDate, endDate, rcNumber } = query;
+    const params: any[] = [];
+    let whereClause = 'WHERE e."rcNumber" IS NOT NULL';
+
+    if (startDate) {
+      params.push(new Date(startDate));
+      whereClause += ` AND e."entryDate" >= $${params.length}`;
+    }
+    if (endDate) {
+      params.push(new Date(endDate));
+      whereClause += ` AND e."entryDate" <= $${params.length}`;
+    }
+    if (rcNumber) {
+      params.push(rcNumber);
+      whereClause += ` AND e."rcNumber" = $${params.length}`;
+    }
+
+    const sql = `
+      SELECT 
+        e."rcNumber",
+        e."location",
+        i."itemCode",
+        SUM(e."actualQuantity")::INTEGER as "totalActualQuantity",
+        SUM(COALESCE(e."correctedQuantity", 0))::INTEGER as "totalCorrectedQuantity"
+      FROM "ProductionEntry" e
+      LEFT JOIN "Item" i ON e."itemId" = i."id"
+      ${whereClause}
+      GROUP BY e."rcNumber", e."location", i."itemCode"
+      ORDER BY MAX(e."createdAt") DESC
+    `;
+
+    return this.prisma.$queryRawUnsafe<any[]>(sql, ...params);
+  }
 
   async findByRcNumber(rcNumber: string) {
     const entries = await this.prisma.productionEntry.findMany({
