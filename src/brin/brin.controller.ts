@@ -10,6 +10,9 @@ import { BrinService } from './brin.service';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UpdateQuantityWithLogDto } from './dto/update-quantity-with-log.dto';
 
+/**
+ * Last updated: 2026-04-11 for quantity separation fix
+ */
 @ApiTags('BRIN')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
