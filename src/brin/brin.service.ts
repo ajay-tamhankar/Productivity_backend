@@ -7,7 +7,7 @@ export class BrinService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByRcNumber(rcNumber: string) {
-    return this.prisma.productionEntry.findMany({
+    const entries = await this.prisma.productionEntry.findMany({
       where: { rcNumber },
       include: {
         operator: { select: { id: true, name: true, role: true } },
@@ -21,6 +21,12 @@ export class BrinService {
         },
       },
     });
+
+    return entries.map((entry) => ({
+      ...entry,
+      originalQuantity: entry.actualQuantity,
+      actualQuantity: entry.correctedQuantity ?? entry.actualQuantity,
+    }));
   }
 
   async updateLocationByRc(rcNumber: string, location: string, userId: string) {

@@ -43,11 +43,17 @@ export class ReportsService {
       }),
     ]);
 
+    const mappedData = data.map((entry) => ({
+      ...entry,
+      originalQuantity: entry.actualQuantity,
+      actualQuantity: entry.correctedQuantity ?? entry.actualQuantity,
+    }));
+
     return {
       page,
       totalPages: Math.ceil(totalRecords / limit),
       totalRecords,
-      data,
+      data: mappedData,
     };
   }
 
