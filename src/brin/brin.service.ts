@@ -13,7 +13,7 @@ export class BrinService {
         operator: { select: { id: true, name: true, role: true } },
         machine: true,
         item: true,
-        quantityEditLogs: {
+        brinActivities: {
           include: {
             editedBy: { select: { id: true, name: true } },
           },
@@ -23,7 +23,7 @@ export class BrinService {
     });
   }
 
-  async updateLocationByRc(rcNumber: string, location: string) {
+  async updateLocationByRc(rcNumber: string, location: string, comment: string, userId: string) {
     const entries = await this.prisma.productionEntry.findMany({
       where: { rcNumber },
     });
@@ -32,9 +32,26 @@ export class BrinService {
       throw new NotFoundException(`No production entries found for RC number: ${rcNumber}`);
     }
 
-    return this.prisma.productionEntry.updateMany({
-      where: { rcNumber },
-      data: { location },
+    return this.prisma.$transaction(async (tx) => {
+      // Create activity logs for each entry
+      for (const entry of entries) {
+        await tx.brinActivity.create({
+          data: {
+            productionEntryId: entry.id,
+            activityType: 'LOCATION_UPDATE',
+            oldValue: entry.location || 'N/A',
+            newValue: location,
+            comment,
+            editedById: userId,
+          },
+        });
+      }
+
+      // Perform batch update
+      return tx.productionEntry.updateMany({
+        where: { rcNumber },
+        data: { location },
+      });
     });
   }
 
@@ -58,19 +75,20 @@ export class BrinService {
     const runningHoursRaw = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
 
     if (runningHoursRaw <= 0) {
-        throw new BadRequestException('Invalid entry times: End time must be after start time');
+      throw new BadRequestException('Invalid entry times: End time must be after start time');
     }
 
     const partsPerHour = Number((newQuantity / runningHoursRaw).toFixed(2));
     const weightInKgs = Number(((newQuantity * itemFinishWeight) / 1000).toFixed(3));
 
     return this.prisma.$transaction(async (tx) => {
-      // Create log
-      await tx.quantityEditLog.create({
+      // Create activity log
+      await tx.brinActivity.create({
         data: {
           productionEntryId: entryId,
-          previousQuantity,
-          newQuantity,
+          activityType: 'QUANTITY_UPDATE',
+          oldValue: previousQuantity.toString(),
+          newValue: newQuantity.toString(),
           comment: updateDto.comment,
           editedById: userId,
         },
@@ -85,9 +103,25 @@ export class BrinService {
           weightInKgs,
         },
         include: {
-          quantityEditLogs: true,
+          brinActivities: true,
         },
       });
+    });
+  }
+
+  async getActivityLogs() {
+    return this.prisma.brinActivity.findMany({
+      include: {
+        editedBy: { select: { id: true, name: true } },
+        productionEntry: {
+          include: {
+            machine: true,
+            item: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50, // Limit to last 50 for performance
     });
   }
 }

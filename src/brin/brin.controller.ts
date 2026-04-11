@@ -27,8 +27,12 @@ export class BrinController {
   @Patch('rc/:rcNumber/location')
   @Roles(Role.BRIN, Role.ADMIN)
   @ApiOperation({ summary: 'Update location for all entries with the given RC number' })
-  updateLocation(@Param('rcNumber') rcNumber: string, @Body() dto: UpdateLocationDto) {
-    return this.brinService.updateLocationByRc(rcNumber, dto.location);
+  updateLocation(
+    @Param('rcNumber') rcNumber: string,
+    @Body() dto: UpdateLocationDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.brinService.updateLocationByRc(rcNumber, dto.location, dto.comment, user.sub);
   }
 
   @Patch('entries/:id/quantity')
@@ -40,5 +44,12 @@ export class BrinController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.brinService.updateQuantity(id, dto, user.sub);
+  }
+
+  @Get('activity')
+  @Roles(Role.BRIN, Role.ADMIN)
+  @ApiOperation({ summary: 'Get all activity logs for the BRIN dashboard' })
+  getActivityLogs() {
+    return this.brinService.getActivityLogs();
   }
 }

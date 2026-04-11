@@ -44,7 +44,7 @@ model User {
   updatedAt          DateTime           @updatedAt
   productionEntries  ProductionEntry[]  @relation("OperatorProductionEntries")
   approvedEntries    ProductionEntry[]  @relation("ApprovedProductionEntries")
-  quantityEdits      QuantityEditLog[]
+  brinActivities     BrinActivity[]
 }
 
 model Machine {
@@ -104,7 +104,7 @@ model ProductionEntry {
   machine           Machine           @relation(fields: [machineId], references: [id])
   item              Item              @relation(fields: [itemId], references: [id])
   rejectionLogs     RejectionLog[]
-  quantityEditLogs  QuantityEditLog[]
+  brinActivities    BrinActivity[]
 
   @@index([entryDate, shift])
   @@index([machineId])
@@ -122,11 +122,12 @@ model RejectionLog {
   @@index([productionEntryId])
 }
 
-model QuantityEditLog {
+model BrinActivity {
   id                String           @id @default(cuid())
   productionEntryId String
-  previousQuantity  Int
-  newQuantity       Int
+  activityType      String           // e.g., 'QUANTITY_UPDATE', 'LOCATION_UPDATE'
+  oldValue          String?
+  newValue          String?
   comment           String
   editedById        String
   createdAt         DateTime         @default(now())
@@ -135,4 +136,5 @@ model QuantityEditLog {
   editedBy          User             @relation(fields: [editedById], references: [id])
 
   @@index([productionEntryId])
+  @@index([editedById])
 }

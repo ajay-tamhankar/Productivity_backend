@@ -6,4 +6,9 @@ export class UpdateLocationDto {
   @IsString()
   @IsNotEmpty()
   location: string;
+
+  @ApiProperty({ example: 'Moved for better organization', description: 'Reason for changing the location' })
+  @IsString()
+  @IsNotEmpty()
+  comment: string;
 }
