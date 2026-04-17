@@ -246,7 +246,7 @@ export class DashboardService {
 
     return grouped.map((item) => ({
       name: users.find((u) => u.id === item.operatorId)?.name ?? 'Unknown',
-      value: item._sum.actualQuantity ?? 0,
+      value: Number(item.total ?? 0),
     }));
   }
 
@@ -272,7 +272,7 @@ export class DashboardService {
     return grouped.map((item) => ({
       name: machines.find((m) => m.id === item.machineId)?.name ?? 'Unknown',
       machineNumber: machines.find((m) => m.id === item.machineId)?.machineNumber,
-      value: item._sum.actualQuantity ?? 0,
+      value: Number(item.total ?? 0),
     }));
   }
 }
